@@ -1,0 +1,18 @@
+kind: AuthConfig
+version: v4
+definition:
+  mode:
+    webhook:
+      url:
+        valueFromEnv: AUTH_WEBHOOK_URL
+      method: POST
+      customHeadersConfig:
+        body:
+          headers:
+            forward:
+              - authorization
+              - content-type
+              - cache-control
+        headers:
+          additional:
+            user-agent: "Hasura DDN"

@@ -1,0 +1,121 @@
+---
+kind: ObjectType
+version: v1
+definition:
+  name: Table
+  fields:
+    - name: id
+      type: Int32!
+    - name: name
+      type: String_1!
+  graphql:
+    typeName: Table
+    inputTypeName: TableInput
+  dataConnectorTypeMapping:
+    - dataConnectorName: mypostgres
+      dataConnectorObjectType: table
+
+---
+kind: TypePermissions
+version: v1
+definition:
+  typeName: Table
+  permissions:
+    - role: admin
+      output:
+        allowedFields:
+          - id
+          - name
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: TableBoolExp
+  operand:
+    object:
+      type: Table
+      comparableFields:
+        - fieldName: id
+          booleanExpressionType: Int4BoolExp
+        - fieldName: name
+          booleanExpressionType: TextBoolExp
+      comparableRelationships: []
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: TableBoolExp
+
+---
+kind: AggregateExpression
+version: v1
+definition:
+  name: TableAggExp
+  operand:
+    object:
+      aggregatedType: Table
+      aggregatableFields:
+        - fieldName: id
+          aggregateExpression: Int4AggExp
+        - fieldName: name
+          aggregateExpression: TextAggExp
+  count:
+    enable: true
+    returnType: Int64
+  graphql:
+    selectTypeName: TableAggExp
+
+---
+kind: OrderByExpression
+version: v1
+definition:
+  name: TableOrderByExp
+  operand:
+    object:
+      orderedType: Table
+      orderableFields:
+        - fieldName: id
+          orderByExpression: Int32OrderByExp
+        - fieldName: name
+          orderByExpression: String1OrderByExp
+      orderableRelationships: []
+  graphql:
+    expressionTypeName: TableOrderByExp
+
+---
+kind: Model
+version: v2
+definition:
+  name: Table
+  objectType: Table
+  source:
+    dataConnectorName: mypostgres
+    collection: table
+  filterExpressionType: TableBoolExp
+  aggregateExpression: TableAggExp
+  orderByExpression: TableOrderByExp
+  graphql:
+    selectMany:
+      queryRootField: table
+      subscription:
+        rootField: table
+    selectUniques: []
+    filterInputTypeName: TableFilterInput
+    aggregate:
+      queryRootField: tableAggregate
+      subscription:
+        rootField: tableAggregate
+
+---
+kind: ModelPermissions
+version: v1
+definition:
+  modelName: Table
+  permissions:
+    - role: admin
+      select:
+        filter: null
+        allowSubscriptions: true
+

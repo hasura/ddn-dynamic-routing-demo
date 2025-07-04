@@ -1,0 +1,45 @@
+include:
+  - path: app/connector/mypostgres/compose.yaml
+services:
+  engine:
+    build:
+      context: engine
+      dockerfile: Dockerfile.engine
+      pull: true
+    environment:
+      AUTHN_CONFIG_PATH: /md/auth_config.json
+      ENABLE_CORS: "true"
+      ENABLE_SQL_INTERFACE: "true"
+      INTROSPECTION_METADATA_FILE: /md/metadata.json
+      METADATA_PATH: /md/open_dd.json
+      OTLP_ENDPOINT: http://local.hasura.dev:4317
+    extra_hosts:
+      - local.hasura.dev:host-gateway
+    labels:
+      io.hasura.ddn.service-name: engine
+    ports:
+      - 3280:3000
+  otel-collector:
+    command:
+      - --config=/etc/otel-collector-config.yaml
+    environment:
+      HASURA_DDN_PAT: ${HASURA_DDN_PAT}
+    image: otel/opentelemetry-collector:0.104.0
+    ports:
+      - 4317:4317
+      - 4318:4318
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+  webhook:
+    build:
+      context: webhook
+      dockerfile: Dockerfile
+    ports:
+      - 3033:3033
+    environment:
+      # sample hasura jwt for this key
+      # eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3MzU5MTY3MTgsImV4cCI6MTc5NjkxNjY3NywiY2xhaW1zLmp3dC5oYXN1cmEuaW8iOnsieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoiYWRtaW4iLCJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbInVzZXIiLCJhZG1pbiJdLCJ4LWhhc3VyYS11c2VyLWlkIjoxMjM0fX0.gfXsQH0Gv28IqD2mFT3qfe2uQ7RmItCnMZO169xX1T8
+      JWT_SECRET: a-string-secret-at-least-256-bits-long
+    extra_hosts:
+      - local.hasura.dev:host-gateway
+    restart: unless-stopped
